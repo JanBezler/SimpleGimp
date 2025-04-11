@@ -19,9 +19,20 @@ PNM* Correction::transform()
     int width  = image->width();
     int height = image->height();
 
-    PNM* newImage = new PNM(width, height, image->format());
+    for (int i = 0; i < PIXEL_VAL_MAX + 1; i++)
+    {
+        LUT[i] = qBound(0, int((i + shift) * factor), PIXEL_VAL_MAX);
+        LUT[i] = qBound(0, int(pow(LUT[i], gamma)), PIXEL_VAL_MAX);
+    }
 
-    qDebug() << Q_FUNC_INFO << "Not implemented yet!";
+    PNM* newImage = new PNM(width, height, image->format());
+    for (int x = 0; x < width; x++)
+        for (int y = 0; y < height; y++)
+        {
+            QRgb pixel = image->pixel(x, y);
+            QColor newPixel = QColor(LUT[qRed(pixel)], LUT[qGreen(pixel)], LUT[qBlue(pixel)]);
+            newImage->setPixel(x, y, newPixel.rgb());
+        }
 
     return newImage;
 }
