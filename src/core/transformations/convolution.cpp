@@ -22,7 +22,8 @@ math::matrix<float> Convolution::getMask(int size, Mode mode = Normalize)
 {
     math::matrix<float> mask(size, size);
 
-    qDebug() << Q_FUNC_INFO << "Not implemented yet!";
+    int center = size / 2;
+    mask(center, center) = 1.0f;
 
     return mask;
 }
@@ -35,7 +36,42 @@ PNM* Convolution::convolute(math::matrix<float> mask, Mode mode = RepeatEdge)
 
     PNM* newImage = new PNM(width, height, image->format());
 
-    qDebug() << Q_FUNC_INFO << "Not implemented yet!";
+    float weight = sum(mask);
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            float rAccum = 0.0f;
+            float gAccum = 0.0f;
+            float bAccum = 0.0f;
+
+            math::matrix<float> windowR = getWindow(x, y, mask.rowno(), RChannel, mode);
+            math::matrix<float> windowG = getWindow(x, y, mask.rowno(), GChannel, mode);
+            math::matrix<float> windowB = getWindow(x, y, mask.rowno(), BChannel, mode);
+            for (int i = 0; i < mask.rowno(); i++)
+            {
+                for (int j = 0; j < mask.colno(); j++)
+                {
+                    float maskValue = mask(i, j);
+                    rAccum += windowR(i, j) * maskValue;
+                    gAccum += windowG(i, j) * maskValue;
+                    bAccum += windowB(i, j) * maskValue;
+                }
+            }
+
+            if (weight != 0.0f)
+            {
+                rAccum /= weight;
+                gAccum /= weight;
+                bAccum /= weight;
+            }
+
+            int r = std::clamp(static_cast<int>(rAccum), 0, 255);
+            int g = std::clamp(static_cast<int>(gAccum), 0, 255);
+            int b = std::clamp(static_cast<int>(bAccum), 0, 255);
+            newImage->setPixel(x, y, qRgb(r, g, b));
+        }
+    }
 
     return newImage;
 }
@@ -48,7 +84,9 @@ const math::matrix<float> Convolution::join(math::matrix<float> A, math::matrix<
     int size = A.rowno();
     math::matrix<float> C(size, size);
 
-    qDebug() << Q_FUNC_INFO << "Not implemented yet!";
+    for (int i = 0; i < size; i++)
+        for (int j = 0; j < size; j++)
+            C(i, j) = A(i, j) * B(i, j);
 
     return C;
 }
@@ -58,10 +96,12 @@ const float Convolution::sum(const math::matrix<float> A)
 {
     float sum = 0.0;
 
-    qDebug() << Q_FUNC_INFO << "Not implemented yet!";
+    for (int i = 0; i < A.rowno(); i++)
+        for (int j = 0; j < A.colno(); j++)
+            sum += A(i, j);
+
 
     return sum;
-
 }
 
 
@@ -71,7 +111,9 @@ const math::matrix<float> Convolution::reflection(const math::matrix<float> A)
     int size = A.rowno();
     math::matrix<float> C(size, size);
 
-    qDebug() << Q_FUNC_INFO << "Not implemented yet!";
+    for (int i = 0; i < size; i++)
+        for (int j = 0; j < size; j++)
+            C(i, j) = A(size - 1 - i, size - 1 - j);
 
     return C;
 }
