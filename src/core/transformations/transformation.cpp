@@ -103,9 +103,9 @@ QRgb Transformation::getPixel(int x, int y, Mode mode)
  */
 QRgb Transformation::getPixelCyclic(int x, int y)
 {
-    qDebug() << Q_FUNC_INFO << "Not implemented yet!";
-
-    return image->pixel(x,y);
+    int width = image->width();
+    int height = image->height();
+    return image->pixel((x % width + width) % width, (y % height + height) % height);
 }
 
 /**
@@ -114,9 +114,13 @@ QRgb Transformation::getPixelCyclic(int x, int y)
   */
 QRgb Transformation::getPixelNull(int x, int y)
 {
-    qDebug() << Q_FUNC_INFO << "Not implemented yet!";
-
-    return image->pixel(x,y);
+    int width = image->width();
+    int height = image->height();
+    if (x < 0 || x >= width || y < 0 || y >= height)
+    {
+        return qRgb(0, 0, 0);
+    }
+    return image->pixel(x, y);
 }
 
 /**
@@ -126,9 +130,9 @@ QRgb Transformation::getPixelNull(int x, int y)
   */
 QRgb Transformation::getPixelRepeat(int x, int y)
 {
-    qDebug() << Q_FUNC_INFO << "Not implemented yet!";
-
-    return image->pixel(x,y);
+    int width = image->width();
+    int height = image->height();
+    return image->pixel(std::clamp(x, 0, width - 1), std::clamp(y, 0, height - 1));
 }
 
 /** Returns a size x size part of the image centered around (x,y) */
@@ -136,10 +140,29 @@ math::matrix<float> Transformation::getWindow(int x, int y, int size,
                                               Channel channel,
                                               Mode mode = RepeatEdge)
 {
-    math::matrix<float> window(size,size);
+    math::matrix<float> window(size, size);
+    int halfSize = size / 2;
 
-    qDebug() << Q_FUNC_INFO << "Not implemented yet!";
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++)
+        {
+            int pixelX = x + (i - halfSize);
+            int pixelY = y + (j - halfSize);
+            QRgb pixel = getPixel(pixelX, pixelY, mode);
 
+            float value = 0.0f;
+            switch (channel)
+            {
+            case RChannel: value = qRed(pixel); break;
+            case GChannel: value = qGreen(pixel); break;
+            case BChannel: value = qBlue(pixel); break;
+            case LChannel: value = qGray(pixel); break;
+            default: break;
+            }
+            window(i, j) = value;
+        }
+    }
     return window;
 }
 
