@@ -12,15 +12,16 @@ BinarizationManual::BinarizationManual(PNM* img, ImageViewer* iv) :
 
 PNM* BinarizationManual::transform()
 {
-    int threshold = getParameter("threshold").toInt();
+    const int threshold = getParameter("threshold").toInt();
 
-    int width  = image->width();
-    int height = image->height();
+    const int width  = image->width();
+    const int height = image->height();
 
     PNM* newImage = new PNM(width, height, QImage::Format_Mono);
-
-    qDebug() << Q_FUNC_INFO << "Not implemented yet!";
-
+    for (int x = 0; x < width; x++)
+        for (int y = 0; y < height; y++)
+            newImage->setPixel(x, y, qGray(image->pixel(x, y)) >= threshold);
+        
     return newImage;
 }
 
