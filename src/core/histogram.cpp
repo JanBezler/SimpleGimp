@@ -24,15 +24,82 @@ Histogram::~Histogram()
 
 void Histogram::generate(QImage* image)
 {
-    qDebug() << Q_FUNC_INFO << "Not implemented yet!";
+    int width = image->width();
+    int height = image->height();
+
+    for (int x = 0; x < width; x++)
+        for (int y = 0; y < height; y++)
+        {
+            QRgb pixel = image->pixel(x, y);
+            int r = qRed(pixel);
+            int g = qGreen(pixel);
+            int b = qBlue(pixel);
+            int l = qGray(pixel);
+            R->insert(r, R->value(r, 0) + 1);
+            G->insert(g, G->value(g, 0) + 1);
+            B->insert(b, B->value(b, 0) + 1);
+            L->insert(l, L->value(l, 0) + 1);
+        }
 }
 
 /** Returns the maximal value of the histogram in the given channel */
-int Histogram::maximumValue(Channel selectedChannel = RGB)
+int Histogram::maximumValue(Channel selectedChannel = RGB, bool ofKey = false)
 {
-    qDebug() << Q_FUNC_INFO << "Not implemented yet!";
+    if (selectedChannel == RGB)
+        return std::max({ maximumValue(RChannel), maximumValue(GChannel), maximumValue(BChannel) });
+    
 
-    return 0;
+    QHash<int, int>* channelHash = get(selectedChannel);
+    if (!channelHash) return 0;
+
+    int maxValue = 0;
+    QHash<int, int>::const_iterator it = channelHash->begin();
+    while (it != channelHash->end())
+    {
+        if (ofKey)
+        {
+            if (it.key() > maxValue)
+            {
+                maxValue = it.key();
+            }
+        }
+        else if (it.value() > maxValue)
+        {
+            maxValue = it.value();
+        }
+        ++it;
+    }
+    return maxValue;
+}
+
+/** Returns the minimal value of the histogram in the given channel */
+int Histogram::minimumValue(Channel selectedChannel = RGB, bool ofKey = false)
+{
+    if (selectedChannel == RGB)
+        return std::min({ maximumValue(RChannel), maximumValue(GChannel), maximumValue(BChannel) });
+
+
+    QHash<int, int>* channelHash = get(selectedChannel);
+    if (!channelHash) return 0;
+
+    QHash<int, int>::const_iterator it = channelHash->begin();
+    int minValue = it.value();
+    while (it != channelHash->end())
+    {
+        if (ofKey)
+        {
+            if (it.key() < minValue)
+            {
+                minValue = it.key();
+            }
+        }
+        else if (it.value() < minValue)
+        {
+            minValue = it.value();
+        }
+        ++it;
+    }
+    return minValue;
 }
 
 
