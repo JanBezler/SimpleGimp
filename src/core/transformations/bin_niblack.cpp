@@ -20,7 +20,32 @@ PNM* BinarizationNiblack::transform()
 
     PNM* newImage = new PNM(width, height, QImage::Format_Mono);
 
-    qDebug() << Q_FUNC_INFO << "Not implemented yet!";
+    for (int y = 0; y < height; y++)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            math::matrix<float> window = getWindow(x, y, r, Transformation::Channel::LChannel, Transformation::Mode::RepeatEdge);
+
+            double sum = 0.0;
+            double sumSq = 0.0;
+            int windowSize = window.rowno() * window.colno();
+
+            for (int i = 0; i < window.rowno(); i++)
+            {
+                for (int j = 0; j < window.colno(); j++)
+                {
+                    double value = window(i, j);
+                    sum += value;
+                    sumSq += value * value;
+                }
+            }
+
+            double mean = sum / windowSize;
+            double stddev = std::sqrt((sumSq / windowSize) - (mean * mean));
+            double threshold = mean + a * stddev;
+            newImage->setPixel(x, y, qGray(image->pixel(x, y)) > threshold ? Qt::color1 : Qt::color0);
+        }
+    }
 
     return newImage;
 }

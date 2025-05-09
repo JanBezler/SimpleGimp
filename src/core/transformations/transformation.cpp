@@ -130,9 +130,7 @@ QRgb Transformation::getPixelNull(int x, int y)
   */
 QRgb Transformation::getPixelRepeat(int x, int y)
 {
-    int width = image->width();
-    int height = image->height();
-    return image->pixel(std::clamp(x, 0, width - 1), std::clamp(y, 0, height - 1));
+    return image->pixel(std::clamp(x, 0, image->width() - 1), std::clamp(y, 0, image->height() - 1));
 }
 
 /** Returns a size x size part of the image centered around (x,y) */
