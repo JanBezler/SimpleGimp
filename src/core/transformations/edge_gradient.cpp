@@ -13,12 +13,12 @@ EdgeGradient::EdgeGradient(PNM* img) :
 
 PNM* EdgeGradient::verticalDetection()
 {
-    return convolute(g_y, RepeatEdge);
+    return convolute(-g_y, RepeatEdge);
 }
 
 PNM* EdgeGradient::horizontalDetection()
 {
-    return convolute(g_x, RepeatEdge);
+    return convolute(-g_x, RepeatEdge);
 }
 
 PNM* EdgeGradient::transform()
