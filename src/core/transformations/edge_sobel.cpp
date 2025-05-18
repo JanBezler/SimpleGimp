@@ -39,17 +39,45 @@ void EdgeSobel::prepareMatrices()
 math::matrix<float>* EdgeSobel::rawHorizontalDetection()
 {
     math::matrix<float>* x_gradient = new math::matrix<float>(this->image->width(), this->image->height());
-
-    qDebug() << Q_FUNC_INFO << "Not implemented yet!";
-
+    for (int y = 1; y < this->image->height() - 1; ++y)
+    {
+        for (int x = 1; x < this->image->width() - 1; ++x)
+        {
+            float gradient = 0.0f;
+            for (int i = -1; i <= 1; ++i)
+            {
+                for (int j = -1; j <= 1; ++j)
+                {
+                    QRgb pixel = this->image->pixel(x + j, y + i);
+                    float intensity = qGray(pixel);
+                    gradient += intensity * g_x(i + 1, j + 1);
+                }
+            }
+            (*x_gradient)(x, y) = gradient;
+        }
+    }
     return x_gradient;
 }
 
 math::matrix<float>* EdgeSobel::rawVerticalDetection()
 {
-    math::matrix<float>* y_gradient = new  math::matrix<float>(this->image->width(), this->image->height());
-
-    qDebug() << Q_FUNC_INFO << "Not implemented yet!";
-
+    math::matrix<float>* y_gradient = new math::matrix<float>(this->image->width(), this->image->height());
+    for (int y = 1; y < this->image->height() - 1; ++y)
+    {
+        for (int x = 1; x < this->image->width() - 1; ++x)
+        {
+            float gradient = 0.0f;
+            for (int i = -1; i <= 1; ++i)
+            {
+                for (int j = -1; j <= 1; ++j)
+                {
+                    QRgb pixel = this->image->pixel(x + j, y + i);
+                    float intensity = qGray(pixel);
+                    gradient += intensity * g_y(i + 1, j + 1);
+                }
+            }
+            (*y_gradient)(x, y) = gradient;
+        }
+    }
     return y_gradient;
 }
